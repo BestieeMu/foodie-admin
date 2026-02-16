@@ -1,6 +1,6 @@
 import { io, Socket } from 'socket.io-client';
 
-const URL = import.meta.env.VITE_API_URL || 'http://localhost:4003';
+const URL = import.meta.env.VITE_API_URL || 'http://localhost:4004/api';
 
 class SocketService {
   private socket: Socket | null = null;

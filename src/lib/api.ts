@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:4003/api',
+  baseURL: 'http://localhost:4004/api',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -18,6 +18,7 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
+    console.log(error)
     const originalRequest = error.config;
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
