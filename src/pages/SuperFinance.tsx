@@ -31,7 +31,7 @@ export default function SuperFinance() {
 
   const fetchData = async () => {
     try {
-      const { data } = await api.get('/admin/finance/platform');
+      const { data } = await api.get('/super/finance/platform');
       setData(data);
     } catch (error) {
       console.error('Failed to fetch platform finance:', error);
@@ -40,7 +40,7 @@ export default function SuperFinance() {
 
   const fetchPayouts = async () => {
     try {
-      const { data } = await api.get('/admin/finance/payouts');
+      const { data } = await api.get('/super/finance/payouts');
       setPayouts(data);
     } catch (error) {
       console.error('Failed to fetch payouts:', error);
@@ -52,7 +52,7 @@ export default function SuperFinance() {
   const handleStatusUpdate = async (id: string, status: 'approved' | 'rejected') => {
     if (!confirm(`Are you sure you want to ${status} this payout?`)) return;
     try {
-      await api.patch(`/admin/finance/payouts/${id}`, { status });
+      await api.patch(`/super/finance/payouts/${id}`, { status });
       fetchPayouts(); // Refresh list
       fetchData(); // Refresh stats
     } catch (error) {
@@ -60,7 +60,14 @@ export default function SuperFinance() {
     }
   };
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh]">
+        <div className="w-16 h-16 border-4 border-orange-100 border-t-primary rounded-full animate-spin mb-4"></div>
+        <p className="text-gray-500 font-medium animate-pulse">Loading platform finances...</p>
+      </div>
+    );
+  }
   if (!data) return <div>Failed to load data</div>;
 
   return (
@@ -76,7 +83,7 @@ export default function SuperFinance() {
             </div>
           </div>
           <p className="text-2xl font-bold text-gray-900">
-            ${data.totalGMV.toFixed(2)}
+            ₦{data.totalGMV.toFixed(2)}
           </p>
         </div>
 
@@ -88,7 +95,7 @@ export default function SuperFinance() {
             </div>
           </div>
           <p className="text-2xl font-bold text-gray-900">
-            ${data.totalRevenue.toFixed(2)}
+            ₦{data.totalRevenue.toFixed(2)}
           </p>
         </div>
 
@@ -124,7 +131,7 @@ export default function SuperFinance() {
               {payouts.map((payout) => (
                 <tr key={payout.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 text-sm font-medium text-gray-900">{payout.restaurantName}</td>
-                  <td className="px-6 py-4 text-sm text-gray-900 font-bold">${payout.amount.toFixed(2)}</td>
+                  <td className="px-6 py-4 text-sm text-gray-900 font-bold">₦{payout.amount.toFixed(2)}</td>
                   <td className="px-6 py-4 text-sm text-gray-500">
                     {new Date(payout.requestedAt).toLocaleDateString()}
                   </td>

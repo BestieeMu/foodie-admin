@@ -1,6 +1,6 @@
 import { io, Socket } from 'socket.io-client';
 
-const URL = import.meta.env.VITE_API_URL || 'http://localhost:4004/api';
+const URL = import.meta.env.VITE_SOCKET_URL || 'https://foodie-backend.pxxl.click';
 
 class SocketService {
   private socket: Socket | null = null;
@@ -8,9 +8,13 @@ class SocketService {
   connect() {
     if (this.socket) return;
     
+    const token = localStorage.getItem('accessToken');
     this.socket = io(URL, {
       withCredentials: true,
       autoConnect: true,
+      auth: {
+        token
+      }
     });
 
     this.socket.on('connect', () => {

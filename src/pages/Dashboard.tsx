@@ -20,14 +20,30 @@ export default function Dashboard() {
     return () => { mounted = false; };
   }, []);
 
-  if (loading) return <div>Loading...</div>;
-  if (!stats) return <div>Error loading stats</div>;
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh]">
+        <div className="w-16 h-16 border-4 border-orange-100 border-t-primary rounded-full animate-spin mb-4"></div>
+        <p className="text-gray-500 font-medium animate-pulse">Loading dashboard...</p>
+      </div>
+    );
+  }
+
+  if (!stats) return (
+    <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+      <div className="p-4 bg-red-50 rounded-full text-red-500 mb-4">
+        <Clock size={32} />
+      </div>
+      <h2 className="text-xl font-bold text-gray-900 mb-2">Failed to load data</h2>
+      <p className="text-gray-500">There was an error connecting to the server.</p>
+    </div>
+  );
 
   const cards = [
-    { label: 'Today Revenue', value: `$${stats.todayRevenue.toFixed(2)}`, icon: DollarSign, color: 'text-green-600', bg: 'bg-green-100' },
+    { label: 'Today Revenue', value: `₦${stats.todayRevenue.toFixed(2)}`, icon: DollarSign, color: 'text-green-600', bg: 'bg-green-100' },
     { label: 'Total Orders', value: stats.totalOrders, icon: ShoppingBag, color: 'text-blue-600', bg: 'bg-blue-100' },
     { label: 'Active Orders', value: stats.activeOrders, icon: Clock, color: 'text-orange-600', bg: 'bg-orange-100' },
-    { label: 'Total Revenue', value: `$${stats.totalRevenue.toFixed(2)}`, icon: TrendingUp, color: 'text-purple-600', bg: 'bg-purple-100' },
+    { label: 'Total Revenue', value: `₦${stats.totalRevenue.toFixed(2)}`, icon: TrendingUp, color: 'text-purple-600', bg: 'bg-purple-100' },
   ];
 
   return (
@@ -36,13 +52,13 @@ export default function Dashboard() {
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {cards.map((card) => (
-          <div key={card.label} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <div key={card.label} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-500">{card.label}</p>
                 <p className="text-2xl font-bold text-gray-900 mt-1">{card.value}</p>
               </div>
-              <div className={`p-3 rounded-lg ${card.bg}`}>
+              <div className={`p-4 rounded-xl ${card.bg}`}>
                 <card.icon className={card.color} size={24} />
               </div>
             </div>
@@ -50,10 +66,12 @@ export default function Dashboard() {
         ))}
       </div>
 
-      {/* Placeholder for charts or recent orders */}
-      <div className="mt-8 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-        <h2 className="text-lg font-bold text-gray-900 mb-4">Recent Activity</h2>
-        <p className="text-gray-500">Charts and recent orders table will go here.</p>
+      <div className="mt-8 bg-white p-8 rounded-2xl shadow-sm border border-gray-100 text-center min-h-[300px] flex flex-col items-center justify-center">
+        <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+          <TrendingUp className="text-gray-400" size={32} />
+        </div>
+        <h2 className="text-xl font-bold text-gray-900 mb-2">No Recent Activity</h2>
+        <p className="text-gray-500 max-w-sm">When your restaurant starts receiving orders, recent activity and performance charts will appear here.</p>
       </div>
     </div>
   );

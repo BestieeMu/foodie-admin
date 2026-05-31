@@ -4,6 +4,8 @@ import clsx from 'clsx';
 import { Clock, CheckCircle, Truck, XCircle, ChevronRight } from 'lucide-react';
 import type { Order } from '../types';
 
+import { socketService } from '../services/socket';
+
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: any }> = {
   pending: { label: 'Pending', color: 'bg-yellow-100 text-yellow-800', icon: Clock },
   preparing: { label: 'Preparing', color: 'bg-blue-100 text-blue-800', icon: Clock },
@@ -30,13 +32,21 @@ export default function Orders() {
   useEffect(() => {
     setLoading(true);
     fetchOrders();
-    const interval = setInterval(fetchOrders, 30000); // Poll every 30s
-    return () => clearInterval(interval);
+
+    socketService.connect();
+    socketService.on('orders:update', (data: any) => {
+      // Refresh the orders when there's an update
+      fetchOrders();
+    });
+
+    return () => {
+      socketService.off('orders:update');
+    };
   }, [fetchOrders]);
 
   const updateStatus = async (orderId: string, status: string) => {
     try {
-      await api.patch(`/admin/orders/${orderId}/status`, { status });
+      await api.patch(`/orders/${orderId}/status`, { status });
       fetchOrders();
     } catch (error) {
       console.error('Failed to update status', error);
@@ -90,7 +100,7 @@ export default function Orders() {
                     <span className="text-sm text-gray-500">{new Date(order.createdAt).toLocaleString()}</span>
                   </div>
                   <div className="text-sm text-gray-600">
-                    <span className="font-medium">{order.items.length} items</span> • Total: <span className="font-bold text-gray-900">${order.total.toFixed(2)}</span>
+                    <span className="font-medium">{order.items.length} items</span> • Total: <span className="font-bold text-gray-900">₦{order.total.toFixed(2)}</span>
                   </div>
                   <div className="mt-2 text-sm text-gray-500">
                     {order.type === 'delivery' ? (
@@ -161,7 +171,7 @@ export default function Orders() {
                           </span>
                         )}
                       </span>
-                      <span>${((item.price || item.menuItem?.price || 0) * item.quantity).toFixed(2)}</span>
+                      <span>₦{((item.price || item.menuItem?.price || 0) * item.quantity).toFixed(2)}</span>
                     </li>
                   ))}
                 </ul>

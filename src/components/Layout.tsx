@@ -4,11 +4,35 @@ import { useAuth } from '../context/AuthContext';
 import clsx from 'clsx';
 import { useEffect, useState } from 'react';
 import { socketService } from '../services/socket';
+import { Toaster, toast } from 'react-hot-toast';
 
 export default function Layout() {
   const { logout, user } = useAuth();
   const navigate = useNavigate();
-  const [notification, setNotification] = useState<{ message: string; type: 'info' | 'success' } | null>(null);
+  const playNotificationSound = () => {
+    try {
+      const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioContext) return;
+      const ctx = new AudioContext();
+      const osc = ctx.createOscillator();
+      const gainNode = ctx.createGain();
+      
+      osc.connect(gainNode);
+      gainNode.connect(ctx.destination);
+      
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(880, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.2);
+      
+      gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+      
+      osc.start();
+      osc.stop(ctx.currentTime + 0.2);
+    } catch (e) {
+      console.error('Audio playback failed', e);
+    }
+  };
 
   useEffect(() => {
     socketService.connect();
@@ -19,12 +43,11 @@ export default function Layout() {
         if (user?.role === 'admin' && data.order?.restaurant_id && user.restaurantId && data.order.restaurant_id !== user.restaurantId) {
             return;
         }
-        setNotification({ message: `New Order #${data.order.id.slice(-6)} received!`, type: 'success' });
+        playNotificationSound();
+        toast.success(`New Order #${data.order.id.slice(-6)} received!`, { duration: 6000, icon: '🛎️' });
       } else if (data.type === 'status') {
-         setNotification({ message: `Order #${data.orderId.slice(-6)} updated to ${data.status}`, type: 'info' });
+         toast(`Order #${data.orderId.slice(-6)} updated to ${data.status.replace(/_/g, ' ')}`, { icon: '🔄' });
       }
-      
-      setTimeout(() => setNotification(null), 3000);
     });
 
     return () => {
@@ -108,18 +131,7 @@ export default function Layout() {
 
       {/* Main Content */}
       <main className="flex-1 md:ml-64 p-8 relative">
-        {notification && (
-          <div className={clsx(
-            "fixed top-4 right-4 p-4 rounded-lg shadow-lg text-white z-50 flex items-center gap-3 animate-bounce-in transition-all",
-            notification.type === 'success' ? "bg-green-600" : "bg-blue-600"
-          )}>
-            <Bell size={20} />
-            <div>
-              <p className="font-bold">Notification</p>
-              <p className="text-sm">{notification.message}</p>
-            </div>
-          </div>
-        )}
+        <Toaster position="top-right" toastOptions={{ duration: 4000, style: { background: '#333', color: '#fff', borderRadius: '10px' } }} />
         <Outlet />
       </main>
     </div>

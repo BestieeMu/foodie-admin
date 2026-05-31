@@ -32,7 +32,14 @@ export default function SuperAdminOrders() {
     return o.status === filter;
   });
 
-  if (loading) return <div>Loading orders...</div>;
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh]">
+        <div className="w-16 h-16 border-4 border-orange-100 border-t-primary rounded-full animate-spin mb-4"></div>
+        <p className="text-gray-500 font-medium animate-pulse">Loading platform orders...</p>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -75,7 +82,7 @@ export default function SuperAdminOrders() {
                   {new Date(order.createdAt).toLocaleDateString()}
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-900 font-medium">
-                  ${order.total.toFixed(2)}
+                  ₦{order.total.toFixed(2)}
                 </td>
                 <td className="px-6 py-4">
                   <span className={`px-2 py-1 text-xs font-medium rounded-full capitalize
